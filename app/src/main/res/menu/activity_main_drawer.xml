@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_incubator"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="Incubator" />
+        <item
+            android:id="@+id/nav_notification"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Notification" />
+        <item
+            android:id="@+id/nav_message"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="Messages" />
+        <item
+            android:id="@+id/nav_agreement"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Agreement" />
+    </group>
+
+    <item android:title="Tools">
+        <menu>
+            <item
+                android:id="@+id/nav_about"
+                android:icon="@drawable/ic_menu_share"
+                android:title="About" />
+        </menu>
+    </item>
+
+</menu>
