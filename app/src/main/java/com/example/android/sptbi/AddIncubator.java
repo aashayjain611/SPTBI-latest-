@@ -1,17 +1,18 @@
 package com.example.android.sptbi;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -19,7 +20,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
-
 import java.util.HashMap;
 
 public class AddIncubator extends AppCompatActivity {
@@ -37,6 +37,8 @@ public class AddIncubator extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_incubator);
         initialize();
+        if(!isNetworkAvailable())
+            Toast.makeText(AddIncubator.this,"No internet connection",Toast.LENGTH_LONG).show();
         add_pic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -48,23 +50,28 @@ public class AddIncubator extends AppCompatActivity {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                HashMap<String,String> dataMap=new HashMap<String,String>();
-                String name=inc_name.getText().toString().trim();
-                String email=inc_email.getText().toString().trim();
-                String fndr_name=inc_fndr.getText().toString().trim();
-                String jfrm=inc_jfrm.getText().toString().trim();
-                String contact=inc_contact.getText().toString().trim();
-                dataMap.put("Name",name);
-                dataMap.put("Founder",fndr_name);
-                dataMap.put("Joined",jfrm);
-                dataMap.put("Email",email);
-                dataMap.put("Contact",contact);
-                dataMap.put("Image",downloadUrl.toString());
-                mDatabase.child(name+jfrm).setValue(dataMap);
-                if(!TextUtils.isEmpty(name) && !TextUtils.isEmpty(fndr_name) && !TextUtils.isEmpty(jfrm) && !TextUtils.isEmpty(email) && !TextUtils.isEmpty(contact) && uri != null)
+                try
+                {
+                    HashMap<String,String> dataMap=new HashMap<String,String>();
+                    String name=inc_name.getText().toString().trim();
+                    String email=inc_email.getText().toString().trim();
+                    String fndr_name=inc_fndr.getText().toString().trim();
+                    String jfrm=inc_jfrm.getText().toString().trim();
+                    String contact=inc_contact.getText().toString().trim();
+                    dataMap.put("Name",name);
+                    dataMap.put("Founder",fndr_name);
+                    dataMap.put("Joined",jfrm);
+                    dataMap.put("Email",email);
+                    dataMap.put("Contact",contact);
+                    dataMap.put("Image",downloadUrl.toString());
+                    mDatabase.child(name+jfrm).setValue(dataMap);
                     startActivity(new Intent(AddIncubator.this, IncubatorsActivity.class));
-                else
-                    Toast.makeText(AddIncubator.this,"All fields required",Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                catch (NullPointerException e)
+                {
+                    Toast.makeText(AddIncubator.this,"Field(s) cannot be blank",Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -103,5 +110,17 @@ public class AddIncubator extends AppCompatActivity {
         mDatabase= FirebaseDatabase.getInstance().getReference();
         mStorage= FirebaseStorage.getInstance().getReference();
         mProgress=new ProgressDialog(this);
+    }
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(AddIncubator.this,IncubatorsActivity.class));
     }
 }

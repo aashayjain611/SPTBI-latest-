@@ -6,17 +6,18 @@ package com.example.android.sptbi;
 
 public class Incubator
 {
-    private String Name,Email,Founder,Contact,Image;
+    private String Name,Email,Founder,Contact,Image,Joined;
 
     public Incubator() {
     }
 
-    public Incubator(String name, String email, String founder, String contact, String image) {
+    public Incubator(String name, String email, String founder, String contact, String image, String joined) {
         Name = name;
         Email = email;
         Founder = founder;
         Contact = contact;
         Image = image;
+        Joined=joined;
     }
 
     public String getName()
@@ -39,6 +40,10 @@ public class Incubator
     {
         return Image;
     }
+    public String getJoined()
+    {
+        return Joined;
+    }
     public void setName(String name)
     {
         Name=name;
@@ -51,7 +56,10 @@ public class Incubator
     {
         Founder=founder;
     }
-
+    public void setJoined(String joined)
+    {
+        Joined=joined;
+    }
     public void setContact(String contact)
     {
         Contact=contact;

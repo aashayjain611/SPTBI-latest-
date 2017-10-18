@@ -1,6 +1,9 @@
 package com.example.android.sptbi;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -15,6 +18,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -23,7 +28,6 @@ public class MainActivity extends AppCompatActivity
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private TextView textView;
     private FirebaseUser user;
 
     @Override
@@ -31,7 +35,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -51,7 +54,8 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        textView=(TextView) findViewById(R.id.textView);
+        if(!isNetworkAvailable())
+            Toast.makeText(MainActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
         mAuth=FirebaseAuth.getInstance();
         user=mAuth.getCurrentUser();
         if(user != null)
@@ -64,11 +68,20 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if(firebaseAuth.getCurrentUser() == null)
+                {
                     startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                    finish();
+                }
             }
         };
     }
 
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -94,11 +107,16 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_logout) {
+        if (id == R.id.action_logout)
+        {
             mAuth.signOut();
+            finish();
         }
         if(id == R.id.action_add)
+        {
             startActivity(new Intent(MainActivity.this,AddIncubator.class));
+            finish();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -110,7 +128,10 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_incubator)
+        {
             startActivity(new Intent(MainActivity.this,IncubatorsActivity.class));
+            finish();
+        }
 
         else if (id == R.id.nav_notification) {
 
