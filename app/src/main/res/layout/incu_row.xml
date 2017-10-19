@@ -3,11 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
+    android:layout_margin="8dp"
     android:id="@+id/incu_row">
 
     <RelativeLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <ImageView
@@ -32,45 +32,6 @@
                 android:text="Incubator name"
                 android:layout_marginBottom="8dp"
                 android:gravity="center"/>
-            <TextView
-                android:id="@+id/founder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp"
-                android:text="Founder"/>
-            <TextView
-                android:id="@+id/email"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:text="Email"
-                android:layout_marginBottom="8dp" />
-            <TextView
-                android:id="@+id/contact"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:text="Contact"
-                android:layout_marginBottom="8dp" />
-            <TextView
-                android:id="@+id/joined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp"
-                android:text="Joined from" />
-            <TextView
-                android:id="@+id/hide"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="show less"
-                android:textAllCaps="true"
-                android:textColor="@color/colorAccent"
-                android:paddingBottom="16dp"
-                android:paddingTop="16dp"
-                android:onClick="setVisibilty"
-                android:textStyle="bold"/>
         </LinearLayout>
     </RelativeLayout>
 

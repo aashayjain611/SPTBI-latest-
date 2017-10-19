@@ -9,13 +9,13 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -26,13 +26,14 @@ public class IncubatorsActivity extends AppCompatActivity {
 
     private DatabaseReference mDatabase;
     private RecyclerView mIncuList;
-    private boolean FLAG=false;
+    private boolean FLAG=true;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incubators);
+
 
         if(!isNetworkAvailable())
             Toast.makeText(IncubatorsActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
@@ -65,12 +66,17 @@ public class IncubatorsActivity extends AppCompatActivity {
         FirebaseRecyclerAdapter<Incubator,IncuViewHolder> firebaseRecyclerAdapter=new FirebaseRecyclerAdapter<Incubator, IncuViewHolder>(Incubator.class,R.layout.incu_row,IncuViewHolder.class,mDatabase) {
             @Override
             protected void populateViewHolder(IncuViewHolder viewHolder, Incubator model, int position) {
-                viewHolder.setFounder(model.getFounder());
-                viewHolder.setEmail(model.getEmail());
-                viewHolder.setContact(model.getContact());
+                final String uid=getRef(position).getKey();
                 viewHolder.setName(model.getName());
                 viewHolder.setImage(getApplicationContext(),model.getImage());
-                viewHolder.setJoined(model.getJoined());
+                viewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent details=new Intent(IncubatorsActivity.this,IncubatorDetails.class);
+                        details.putExtra("UID",uid);
+                        startActivity(details);
+                    }
+                });
             }
         };
         mIncuList.setAdapter(firebaseRecyclerAdapter);
@@ -89,30 +95,10 @@ public class IncubatorsActivity extends AppCompatActivity {
             TextView in_name=(TextView)mView.findViewById(R.id.name);
             in_name.setText(name);
         }
-        public void setFounder(String founder)
-        {
-            TextView in_founder=(TextView)mView.findViewById(R.id.founder);
-            in_founder.setText("Founder: "+founder);
-        }
-        public void setEmail(String email)
-        {
-            TextView in_email=(TextView)mView.findViewById(R.id.email);
-            in_email.setText("Email: "+email);
-        }
-        public void setContact(String contact)
-        {
-            TextView in_contact=(TextView)mView.findViewById(R.id.contact);
-            in_contact.setText("Contact: "+contact);
-        }
         public void setImage(Context context,String image)
         {
             ImageView in_image=(ImageView)mView.findViewById(R.id.img);
             Picasso.with(context).load(image).into(in_image);
-        }
-        public void setJoined(String joined)
-        {
-            TextView in_joined=(TextView)mView.findViewById(R.id.joined);
-            in_joined.setText("Joined: "+joined);
         }
     }
 
@@ -147,41 +133,5 @@ public class IncubatorsActivity extends AppCompatActivity {
         startActivity(new Intent(IncubatorsActivity.this,MainActivity.class));
         finish();
     }
-    public void setVisibilty(View view)
-    {
-        final TextView textView=(TextView)findViewById(R.id.hide);
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(FLAG==true)
-                {
-                    textView.setText("learn more");
-                    TextView t=(TextView)findViewById(R.id.founder);
-                    t.setVisibility(view.GONE);
-                    t=(TextView)findViewById(R.id.email);
-                    t.setVisibility(view.GONE);
-                    t=(TextView)findViewById(R.id.contact);
-                    t.setVisibility(view.GONE);
-                    t=(TextView)findViewById(R.id.joined);
-                    t.setVisibility(view.GONE);
-                    Log.e("HELLO GUYS","LEARN MORE");
-                    FLAG=false;
-                }
-                else
-                {
-                    textView.setText("show less");
-                    TextView t=(TextView)findViewById(R.id.founder);
-                    t.setVisibility(view.VISIBLE);
-                    t=(TextView)findViewById(R.id.email);
-                    t.setVisibility(view.VISIBLE);
-                    t=(TextView)findViewById(R.id.contact);
-                    t.setVisibility(view.VISIBLE);
-                    t=(TextView)findViewById(R.id.joined);
-                    t.setVisibility(view.VISIBLE);
-                    Log.e("HELLO GUYS","SHOW LESS");
-                    FLAG=true;
-                }
-            }
-        });
-    }
+
 }

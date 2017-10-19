@@ -119,6 +119,8 @@ public class LoginActivity extends AppCompatActivity {
         {
             EditText email=(EditText)findViewById(R.id.email_id_login);
             String email_id=email.getText().toString().trim();
+            if(!isValidEmail(email_id))
+                throw new IllegalArgumentException();
             EditText password=(EditText)findViewById(R.id.password_login);
             String password_login=password.getText().toString().trim();
             if(TextUtils.isEmpty(email_id) || TextUtils.isEmpty(password_login))
@@ -139,6 +141,10 @@ public class LoginActivity extends AppCompatActivity {
         catch(NullPointerException e)
         {
             Toast.makeText(LoginActivity.this,"Field(s) cannot be blank",Toast.LENGTH_LONG).show();
+        }
+        catch (IllegalArgumentException iae)
+        {
+            Toast.makeText(LoginActivity.this,"Invalid Email-ID",Toast.LENGTH_LONG).show();
         }
     }
 
@@ -164,6 +170,14 @@ public class LoginActivity extends AppCompatActivity {
             }
         }
     }
+
+    public final boolean isValidEmail(CharSequence target) {
+        if (android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches())
+            return true;
+
+        return false;
+    }
+
     @Override
     public void onStart() {
         super.onStart();
