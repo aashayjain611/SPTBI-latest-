@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -68,6 +67,9 @@ public class IncubatorsActivity extends AppCompatActivity {
             protected void populateViewHolder(IncuViewHolder viewHolder, Incubator model, int position) {
                 final String uid=getRef(position).getKey();
                 viewHolder.setName(model.getName());
+                viewHolder.setFounder(model.getFounder());
+                viewHolder.setEmail(model.getEmail());
+                viewHolder.setContact(model.getContact());
                 viewHolder.setImage(getApplicationContext(),model.getImage());
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -90,10 +92,25 @@ public class IncubatorsActivity extends AppCompatActivity {
             super(itemView);
             mView=itemView;
         }
+        public void setFounder(String founder)
+        {
+            TextView in_name=(TextView)mView.findViewById(R.id.founder);
+            in_name.setText("Founder: "+founder);
+        }
         public void setName(String name)
         {
             TextView in_name=(TextView)mView.findViewById(R.id.name);
             in_name.setText(name);
+        }
+        public void setEmail(String email)
+        {
+            TextView in_name=(TextView)mView.findViewById(R.id.email);
+            in_name.setText("Email: "+email);
+        }
+        public void setContact(String contact)
+        {
+            TextView in_name=(TextView)mView.findViewById(R.id.contact);
+            in_name.setText("Contact: "+contact);
         }
         public void setImage(Context context,String image)
         {

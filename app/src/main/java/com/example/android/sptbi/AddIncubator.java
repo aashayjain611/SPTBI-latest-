@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -18,15 +19,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
-
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -42,6 +42,7 @@ public class AddIncubator extends AppCompatActivity {
     private ProgressDialog mProgress;
     private Uri downloadUrl,uri;
     private static String date;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,7 @@ public class AddIncubator extends AppCompatActivity {
 
 
         initialize();
+        final String uid=mAuth.getCurrentUser().getUid();
         if(!isNetworkAvailable())
             Toast.makeText(AddIncubator.this,"No internet connection",Toast.LENGTH_LONG).show();
         add_pic.setOnClickListener(new View.OnClickListener() {
@@ -72,14 +74,19 @@ public class AddIncubator extends AppCompatActivity {
                         throw new IllegalArgumentException();
                     String fndr_name=inc_fndr.getText().toString().trim();
                     String jfrm=inc_jfrm.getText().toString().trim();
+                    if(TextUtils.isEmpty(jfrm))
+                        throw new NullPointerException();
                     String contact=inc_contact.getText().toString().trim();
+                    if(!validContact(contact))
+                        throw new ArrayIndexOutOfBoundsException();
                     dataMap.put("Name",name);
                     dataMap.put("Founder",fndr_name);
                     dataMap.put("Joined",jfrm);
                     dataMap.put("Email",email);
                     dataMap.put("Contact",contact);
                     dataMap.put("Image",downloadUrl.toString());
-                    mDatabase.child(name+jfrm).setValue(dataMap);
+                    dataMap.put("UID",uid);
+                    mDatabase.push().setValue(dataMap);
                     startActivity(new Intent(AddIncubator.this, IncubatorsActivity.class));
                     finish();
                 }
@@ -90,6 +97,10 @@ public class AddIncubator extends AppCompatActivity {
                 catch (IllegalArgumentException iae)
                 {
                     Toast.makeText(AddIncubator.this,"Invalid Email-ID",Toast.LENGTH_LONG).show();
+                }
+                catch (ArrayIndexOutOfBoundsException aiobe)
+                {
+                    Toast.makeText(AddIncubator.this,"Invalid contact",Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -130,6 +141,7 @@ public class AddIncubator extends AppCompatActivity {
         mDatabase= FirebaseDatabase.getInstance().getReference();
         mStorage= FirebaseStorage.getInstance().getReference();
         mProgress=new ProgressDialog(this);
+        mAuth=FirebaseAuth.getInstance();
     }
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
@@ -180,6 +192,12 @@ public class AddIncubator extends AppCompatActivity {
     public final boolean isValidEmail(CharSequence target) {
         if (android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches())
             return true;
+        return false;
+    }
+    public boolean validContact(String number)
+    {
+        if(number.length()==10)
+            return true ;
         return false;
     }
 }
