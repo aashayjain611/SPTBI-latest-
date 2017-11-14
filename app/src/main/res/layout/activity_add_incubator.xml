@@ -1,141 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.android.sptbi.AddIncubator"
-    android:layout_margin="16dp">
+    android:orientation="vertical">
 
-    <RelativeLayout
+    <include layout="@layout/main_toolbar"
+        android:id="@+id/add_incubator_toolbar"/>
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-        <RelativeLayout
-            android:layout_width="150dp"
-            android:layout_height="200dp"
-            android:layout_marginBottom="16dp"
-            android:background="#ffffff"
-            android:id="@+id/img_layout">
-            <ImageView
-                android:id="@+id/incu_img"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_marginBottom="20dp"
+                android:background="#ffffff">
+
+                <ProgressBar
+                    android:id="@+id/CropProgressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:indeterminate="true"
+                    android:visibility="gone"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/img_layout">
+
+                    <ImageView
+                        android:id="@+id/incu_img"
+                        android:contentDescription="@string/incubator_s_logo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitXY"/>
+
+                    <ImageButton
+                        android:id="@+id/action_add"
+                        android:layout_width="wrap_content"
+                        android:contentDescription="@string/click_to_add_photo"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        app:srcCompat="@mipmap/ic_add_a_photo_black_24dp" />
+
+                </RelativeLayout>
+
+            </FrameLayout>
+
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:adjustViewBounds="true"
-                android:scaleType="fitXY"/>
+                android:layout_marginBottom="16dp">
 
-            <ImageButton
-                android:id="@+id/action_add"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                app:srcCompat="@mipmap/ic_add_a_photo_black_24dp" />
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/incu_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/incubator_name"
+                    android:inputType="text" />
+            </android.support.design.widget.TextInputLayout>
 
-        </RelativeLayout>
-        <LinearLayout
-            android:id="@+id/name_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/img_layout"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Incubation name"/>
-            <EditText
-                android:id="@+id/incu_name"
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Incubation name"
-                android:inputType="text"
-                android:layout_marginBottom="16dp"/>
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/fndr_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/name_layout"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Founder"/>
-            <EditText
-                android:id="@+id/incu_fndr"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Founder"
-                android:inputType="text"
-                android:layout_marginBottom="16dp"/>
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/jfrm_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/fndr_layout"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Joined from"/>
-            <TextView
-                android:id="@+id/incu_jfrm"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="16dp"
-                android:paddingTop="16dp"
-                android:gravity="bottom"
-                android:textSize="18sp"
-                android:hint="DD-MM-YYYY"
-                android:textColor="#000000"
-                android:onClick="showDatePickerDialog"/>
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/email_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/jfrm_layout"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Email"/>
-            <EditText
-                android:id="@+id/incu_email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Email"
-                android:inputType="textEmailAddress"
-                android:layout_marginBottom="16dp"/>
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/contact_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/email_layout"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Contact"/>
-            <EditText
-                android:id="@+id/incu_contact"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Contact"
-                android:inputType="phone"
-                android:layout_marginBottom="16dp"/>
-        </LinearLayout>
-        <Button
-            android:id="@+id/save"
-            android:layout_below="@id/contact_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="save"
-            android:background="@color/colorPrimary"
-            android:textColor="#ffffff"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="32dp"/>
-    </RelativeLayout>
+                android:layout_height="match_parent"
+                android:layout_marginBottom="16dp">
 
-</ScrollView>
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/incu_fndr"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/founder"
+                    android:inputType="text" />
+            </android.support.design.widget.TextInputLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/joined_from"/>
+                <TextView
+                    android:id="@+id/incu_jfrm"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="16dp"
+                    android:paddingTop="16dp"
+                    android:gravity="bottom"
+                    android:textSize="18sp"
+                    android:hint="@string/dd_mm_yyyy"
+                    android:textColor="#000000"
+                    android:onClick="showDatePickerDialog"/>
+            </LinearLayout>
+
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="16dp">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/incu_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/email_id" />
+            </android.support.design.widget.TextInputLayout>
+
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="16dp">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/incu_contact"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/contact"
+                    android:inputType="phone"/>
+            </android.support.design.widget.TextInputLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/save"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/save"
+                    android:background="@color/colorPrimary"
+                    android:textColor="#ffffff"
+                    android:layout_alignParentEnd="true"/>
+
+            </RelativeLayout>
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

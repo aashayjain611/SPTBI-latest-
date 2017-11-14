@@ -24,25 +24,33 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
+
 import id.zelory.compressor.Compressor;
 
-public class AddIncubator extends AppCompatActivity {
+public class EditProfileActivity extends AppCompatActivity {
 
     private TextInputEditText inc_name,inc_fndr,inc_email,inc_contact;
     private static TextView inc_jfrm;
@@ -67,11 +75,11 @@ public class AddIncubator extends AppCompatActivity {
         initialize();
         toolbar=(Toolbar)findViewById(R.id.add_incubator_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Add Incubator");
+        getSupportActionBar().setTitle("Edit Profile");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         final String uid=mAuth.getCurrentUser().getUid();
         if(!isNetworkAvailable())
-            Toast.makeText(AddIncubator.this,"No internet connection",Toast.LENGTH_LONG).show();
+            Toast.makeText(EditProfileActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
         add_pic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -115,20 +123,20 @@ public class AddIncubator extends AppCompatActivity {
                             mProgress.dismiss();
                         }
                     });
-                    startActivity(new Intent(AddIncubator.this,MainActivity.class));
+                    startActivity(new Intent(EditProfileActivity.this,MainActivity.class));
                     finish();
                 }
                 catch (NullPointerException e)
                 {
-                    Toast.makeText(AddIncubator.this,"Field(s) cannot be blank",Toast.LENGTH_LONG).show();
+                    Toast.makeText(EditProfileActivity.this,"Field(s) cannot be blank",Toast.LENGTH_LONG).show();
                 }
                 catch (IllegalArgumentException iae)
                 {
-                    Toast.makeText(AddIncubator.this,"Invalid Email-ID",Toast.LENGTH_LONG).show();
+                    Toast.makeText(EditProfileActivity.this,"Invalid Email-ID",Toast.LENGTH_LONG).show();
                 }
                 catch (ArrayIndexOutOfBoundsException aiobe)
                 {
-                    Toast.makeText(AddIncubator.this,"Invalid contact",Toast.LENGTH_LONG).show();
+                    Toast.makeText(EditProfileActivity.this,"Invalid contact",Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -191,7 +199,7 @@ public class AddIncubator extends AppCompatActivity {
                                         mProgress.dismiss();
                                         thumb_uri=thumb_task.getResult().getDownloadUrl();
                                         Log.e("thumbnail ",thumb_uri.toString());
-                                        Picasso.with(AddIncubator.this).load(thumb_uri).into(inc_img);
+                                        Picasso.with(EditProfileActivity.this).load(thumb_uri).into(inc_img);
                                     }
                                 }
                             });
@@ -203,7 +211,6 @@ public class AddIncubator extends AppCompatActivity {
             }
         }
     }
-
 
     public void initialize()
     {
@@ -220,6 +227,46 @@ public class AddIncubator extends AppCompatActivity {
         mStorage= FirebaseStorage.getInstance().getReference();
         mProgress=new ProgressDialog(this);
         mAuth=FirebaseAuth.getInstance();
+        mDatabase.child(mAuth.getCurrentUser().getUid().toString()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                try
+                {
+                    TextInputEditText inc_name=(TextInputEditText)findViewById(R.id.incu_name);
+                    inc_name.setText(dataSnapshot.child("Name").getValue().toString());
+                    TextInputEditText inc_fndr=(TextInputEditText)findViewById(R.id.incu_fndr);
+                    inc_fndr.setText(dataSnapshot.child("Founder").getValue().toString());
+                    TextInputEditText inc_email=(TextInputEditText)findViewById(R.id.incu_email);
+                    inc_email.setText(dataSnapshot.child("Email").getValue().toString());
+                    TextInputEditText inc_contact=(TextInputEditText)findViewById(R.id.incu_contact);
+                    inc_contact.setText(dataSnapshot.child("Contact").getValue().toString());
+                    TextView inc_jfrm=(TextView) findViewById(R.id.incu_jfrm);
+                    inc_jfrm.setText(dataSnapshot.child("Joined").getValue().toString());
+                    Picasso.with(EditProfileActivity.this).load(dataSnapshot.child("Image").getValue().toString()).networkPolicy(NetworkPolicy.OFFLINE).into(inc_img, new Callback() {
+                        @Override
+                        public void onSuccess() {
+
+                        }
+
+                        @Override
+                        public void onError() {
+                            Picasso.with(EditProfileActivity.this).load(downloadUrl).into(inc_img);
+                        }
+                    });
+                }
+                catch (NullPointerException npe)
+                {
+                    Toast.makeText(EditProfileActivity.this,"First create incubator",Toast.LENGTH_LONG).show();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager

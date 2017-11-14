@@ -8,16 +8,17 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -117,11 +118,11 @@ public class LoginActivity extends AppCompatActivity {
 
         try
         {
-            EditText email=(EditText)findViewById(R.id.email_id_login);
+            TextInputEditText email=(TextInputEditText)findViewById(R.id.email_id_login);
             String email_id=email.getText().toString().trim();
             if(!isValidEmail(email_id))
                 throw new IllegalArgumentException();
-            EditText password=(EditText)findViewById(R.id.password_login);
+            TextInputEditText password=(TextInputEditText)findViewById(R.id.password_login);
             String password_login=password.getText().toString().trim();
             if(TextUtils.isEmpty(email_id) || TextUtils.isEmpty(password_login))
                 throw new NullPointerException();
@@ -157,10 +158,15 @@ public class LoginActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
+                mProgress.setTitle("Siging in");
+                mProgress.setMessage("Please wait...");
+                mProgress.show();
+                mProgress.setCanceledOnTouchOutside(false);
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
@@ -186,10 +192,6 @@ public class LoginActivity extends AppCompatActivity {
     }
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
 
-        mProgress.setMessage("Siging in...");
-        mProgress.show();
-        mProgress.setCanceledOnTouchOutside(false);
-        mProgress.setCanceledOnTouchOutside(false);
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);

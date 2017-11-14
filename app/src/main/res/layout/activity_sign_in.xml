@@ -1,65 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context="com.example.android.sptbi.SignInActivity"
-    android:layout_margin="16dp"
     android:orientation="vertical">
 
+    <include layout="@layout/main_toolbar"
+        android:id="@+id/sign_in_toolbar"/>
+
     <LinearLayout
-        android:id="@+id/user_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginBottom="16dp">
+        android:layout_margin="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Email:"
-            android:textSize="24sp"
-            android:layout_marginBottom="8dp"/>
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <EditText
-            android:id="@+id/email"
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/email_id"
+                android:inputType="none" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"/>
+            android:layout_marginTop="23dp">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/password"
+                android:inputType="textPassword" />
+        </android.support.design.widget.TextInputLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/sign_in"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="40dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="@string/sign_in"
+                android:textColor="@android:color/white" />
+
+        </RelativeLayout>
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/user_password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginBottom="16dp"
-        android:layout_below="@id/user_email">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Password:"
-            android:textSize="24sp"
-            android:layout_marginBottom="8dp"/>
-
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword"/>
-
-    </LinearLayout>
-    <Button
-        android:id="@+id/sign_in"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryDark"
-        android:layout_below="@id/user_password"
-        android:layout_alignParentRight="true"
-        android:text="sign in"
-        android:textColor="#ffffff"/>
-
-</RelativeLayout>
+</LinearLayout>

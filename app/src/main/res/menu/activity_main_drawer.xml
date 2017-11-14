@@ -5,23 +5,27 @@
         <item
             android:id="@+id/nav_incubator"
             android:icon="@mipmap/ic_business_black_24dp"
-            android:title="Incubator" />
+            android:title="Incubators"/>
         <item
             android:id="@+id/nav_notification"
             android:icon="@mipmap/ic_notifications_black_24dp"
-            android:title="Notification" />
+            android:title="Notifications"/>
         <item
             android:id="@+id/nav_message"
             android:icon="@mipmap/ic_message_black_24dp"
-            android:title="Messages" />
+            android:title="Chats"/>
         <item
             android:id="@+id/nav_agreement"
             android:icon="@mipmap/ic_book_black_24dp"
-            android:title="Agreement" />
+            android:title="Agreements"/>
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@mipmap/ic_launch_black_24dp"
+            android:title="Logout"/>
         <item
             android:id="@+id/nav_about"
             android:icon="@mipmap/ic_info_black_24dp"
-            android:title="About" />
+            android:title="About"/>
     </group>
 
 
