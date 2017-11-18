@@ -58,7 +58,9 @@ public class LoginActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if(firebaseAuth.getCurrentUser() != null)
                 {
-                    startActivity(new Intent(LoginActivity.this,MainActivity.class));
+                    Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
                     finish();
                 }
 
@@ -134,7 +136,9 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(AuthResult authResult) {
                     mProgress.dismiss();
-                    startActivity(new Intent(LoginActivity.this,MainActivity.class));
+                    Intent intent=new Intent(LoginActivity.this,MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
                     finish();
                 }
             });
@@ -152,6 +156,7 @@ public class LoginActivity extends AppCompatActivity {
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
+
     }
 
     @Override
@@ -163,7 +168,7 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
-                mProgress.setTitle("Siging in");
+                mProgress.setTitle("Logging in");
                 mProgress.setMessage("Please wait...");
                 mProgress.show();
                 mProgress.setCanceledOnTouchOutside(false);

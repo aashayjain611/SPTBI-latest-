@@ -11,7 +11,7 @@
             android:icon="@mipmap/ic_notifications_black_24dp"
             android:title="Notifications"/>
         <item
-            android:id="@+id/nav_message"
+            android:id="@+id/nav_chats"
             android:icon="@mipmap/ic_message_black_24dp"
             android:title="Chats"/>
         <item

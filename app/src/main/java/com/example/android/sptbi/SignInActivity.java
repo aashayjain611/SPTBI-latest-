@@ -66,7 +66,7 @@ public class SignInActivity extends AppCompatActivity {
             String user_password=password.getText().toString().trim();
             if(TextUtils.isEmpty(email_id) || TextUtils.isEmpty(user_password))
                 throw new NullPointerException();
-            mProgress.setTitle("Signing in");
+            mProgress.setTitle("Logging in");
             mProgress.setMessage("Please wait...");
             mProgress.show();
             mProgress.setCanceledOnTouchOutside(false);
@@ -74,14 +74,16 @@ public class SignInActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(AuthResult authResult) {
                     mProgress.dismiss();
-                    startActivity(new Intent(SignInActivity.this,MainActivity.class));
+                    Intent intent=new Intent(SignInActivity.this,MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
                     finish();
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     mProgress.dismiss();
-                    Toast.makeText(SignInActivity.this,"Incorrect password",Toast.LENGTH_LONG).show();
+                    Toast.makeText(SignInActivity.this,"Check credentials",Toast.LENGTH_LONG).show();
                 }
             });
         }
