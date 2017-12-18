@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -26,12 +25,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -44,6 +45,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button create_acc;
     private TextView sign_in;
     private ProgressDialog mProgress;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,7 @@ public class LoginActivity extends AppCompatActivity {
         if(!isNetworkAvailable())
             Toast.makeText(LoginActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
         mAuth=FirebaseAuth.getInstance();
+        mDatabase= FirebaseDatabase.getInstance().getReference().child("Users");
         mAuthListener=new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -118,28 +121,40 @@ public class LoginActivity extends AppCompatActivity {
     }
     private void startRegister() {
 
-        try
-        {
-            TextInputEditText email=(TextInputEditText)findViewById(R.id.email_id_login);
-            String email_id=email.getText().toString().trim();
-            if(!isValidEmail(email_id))
+        try {
+            TextInputEditText email = (TextInputEditText) findViewById(R.id.email_id_login);
+            String email_id = email.getText().toString().trim();
+            if (!isValidEmail(email_id))
                 throw new IllegalArgumentException();
-            TextInputEditText password=(TextInputEditText)findViewById(R.id.password_login);
-            String password_login=password.getText().toString().trim();
-            if(TextUtils.isEmpty(email_id) || TextUtils.isEmpty(password_login))
+            TextInputEditText password = (TextInputEditText) findViewById(R.id.password_login);
+            String password_login = password.getText().toString().trim();
+            if (TextUtils.isEmpty(email_id) || TextUtils.isEmpty(password_login))
                 throw new NullPointerException();
 
             mProgress.setMessage("Creating account...");
             mProgress.show();
             mProgress.setCanceledOnTouchOutside(false);
-            mAuth.createUserWithEmailAndPassword(email_id,password_login).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+            mAuth.createUserWithEmailAndPassword(email_id, password_login).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
-                public void onSuccess(AuthResult authResult) {
-                    mProgress.dismiss();
-                    Intent intent=new Intent(LoginActivity.this,MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if (task.isSuccessful()) {
+                        mProgress.dismiss();
+                        mAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful())
+                                {
+                                    if(mAuth.getCurrentUser().isEmailVerified())
+                                    {
+                                        mDatabase.child(mAuth.getCurrentUser().getUid()).setValue(mAuth.getCurrentUser().getEmail());
+                                    }
+                                } else {
+                                    if (task.getException() instanceof FirebaseAuthUserCollisionException)
+                                        Toast.makeText(LoginActivity.this, "User with this email already exist.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
                 }
             });
         }
@@ -208,7 +223,18 @@ public class LoginActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             mProgress.dismiss();
-
+                            mAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful())
+                                    {
+                                        if(mAuth.getCurrentUser().isEmailVerified())
+                                        {
+                                            mDatabase.child(mAuth.getCurrentUser().getUid()).setValue(mAuth.getCurrentUser().getEmail());
+                                        }
+                                    }
+                                }
+                            });
                         } else {
                             // If sign in fails, display a message to the user.
                             mProgress.dismiss();

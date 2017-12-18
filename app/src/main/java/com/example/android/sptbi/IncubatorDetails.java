@@ -33,7 +33,7 @@ public class IncubatorDetails extends AppCompatActivity {
         key=getIntent().getExtras().getString("UID");
         mDatabase= FirebaseDatabase.getInstance().getReference();
         mDatabase.keepSynced(true);
-        mDatabase.child(key).addValueEventListener(new ValueEventListener() {
+        mDatabase.child("Incubators").child(key).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 

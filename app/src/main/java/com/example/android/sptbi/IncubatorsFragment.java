@@ -59,7 +59,7 @@ public class IncubatorsFragment extends ListFragment {
         mIncuList=(RecyclerView)getView().findViewById(R.id.incubator_list);
         mIncuList.setHasFixedSize(false);
         mIncuList.setLayoutManager(new LinearLayoutManager(getContext()));
-        mDatabase= FirebaseDatabase.getInstance().getReference();
+        mDatabase= FirebaseDatabase.getInstance().getReference().child("Incubators");
         mDatabase.keepSynced(true);
     }
 

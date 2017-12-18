@@ -14,13 +14,20 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -29,6 +36,7 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
     private Toolbar toolbar;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +59,10 @@ public class MainActivity extends AppCompatActivity
         if(!isNetworkAvailable())
             Toast.makeText(MainActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
         mAuth=FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("Incubators");
         user=mAuth.getCurrentUser();
+
+        Log.e("Current user",user.toString());
         if(user != null)
         {
             View hView =  navigationView.getHeaderView(0);
@@ -63,8 +74,9 @@ public class MainActivity extends AppCompatActivity
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if(firebaseAuth.getCurrentUser() == null)
                 {
-                    startActivity(new Intent(MainActivity.this,LoginActivity.class));
-                    finish();
+                    Intent intent=new Intent(MainActivity.this,LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
                 }
             }
         };
@@ -102,6 +114,10 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        if(mAuth.getCurrentUser().getEmail().equals("aashayjain611@gmail.com")) {
+            MenuItem menuItem = menu.findItem(R.id.remove_user);
+            menuItem.setVisible(true);
+        }
         return true;
     }
 
@@ -127,7 +143,41 @@ public class MainActivity extends AppCompatActivity
         {
             startActivity(new Intent(MainActivity.this,EditProfileActivity.class));
         }
+        if(id == R.id.action_delete)
+        {
+            //delete your incubator
+            mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.hasChild(mAuth.getCurrentUser().getUid()))
+                    {
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setMessage("Are you sure you want to delete your incubator?")
+                                .setCancelable(false)
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        mDatabase.child(mAuth.getCurrentUser().getUid()).removeValue();
+                                    }
+                                })
+                                .setNegativeButton("No", null)
+                                .show();
+                    }
+                    else
+                    {
+                        Toast.makeText(MainActivity.this,"Couldn't find your incubator",Toast.LENGTH_LONG).show();
+                    }
+                }
 
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+        /*if(id == R.id.remove_user)
+        {
+            startActivity(new Intent(MainActivity.this,RemoveUserActivity.class));
+        }*/
         return super.onOptionsItemSelected(item);
     }
 
@@ -170,5 +220,4 @@ public class MainActivity extends AppCompatActivity
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
     }
-
 }

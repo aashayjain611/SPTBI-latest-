@@ -215,7 +215,7 @@ public class AddIncubator extends AppCompatActivity {
         inc_img=(ImageView)findViewById(R.id.incu_img);
         add_pic=(ImageView) findViewById(R.id.action_add);
         save=(Button)findViewById(R.id.save);
-        mDatabase= FirebaseDatabase.getInstance().getReference();
+        mDatabase= FirebaseDatabase.getInstance().getReference().child("Incubators");
         mDatabase.keepSynced(true);
         mStorage= FirebaseStorage.getInstance().getReference();
         mProgress=new ProgressDialog(this);

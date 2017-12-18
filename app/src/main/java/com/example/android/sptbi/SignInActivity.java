@@ -14,10 +14,16 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class SignInActivity extends AppCompatActivity {
 
@@ -27,6 +33,7 @@ public class SignInActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private ProgressDialog mProgress;
     private Toolbar toolbar;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +47,7 @@ public class SignInActivity extends AppCompatActivity {
         if(!isNetworkAvailable())
             Toast.makeText(SignInActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
         mAuth=FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
         email=(TextInputEditText)findViewById(R.id.email);
         password=(TextInputEditText)findViewById(R.id.password);
         sign_in=(Button)findViewById(R.id.sign_in);
@@ -74,10 +82,28 @@ public class SignInActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(AuthResult authResult) {
                     mProgress.dismiss();
-                    Intent intent=new Intent(SignInActivity.this,MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
+                    mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if(dataSnapshot.hasChild(mAuth.getCurrentUser().getUid()))
+                            {
+                                if(mAuth.getCurrentUser().isEmailVerified())
+                                {
+                                    Intent intent=new Intent(SignInActivity.this,MainActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            }
+                            else
+                                Toast.makeText(SignInActivity.this,"User not found",Toast.LENGTH_LONG).show();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override

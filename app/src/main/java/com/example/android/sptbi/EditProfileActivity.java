@@ -227,7 +227,7 @@ public class EditProfileActivity extends AppCompatActivity {
         mStorage= FirebaseStorage.getInstance().getReference();
         mProgress=new ProgressDialog(this);
         mAuth=FirebaseAuth.getInstance();
-        mDatabase.child(mAuth.getCurrentUser().getUid().toString()).addValueEventListener(new ValueEventListener() {
+        mDatabase.child("Incubators").child(mAuth.getCurrentUser().getUid().toString()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
