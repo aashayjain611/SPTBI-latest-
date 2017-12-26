@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -31,8 +32,15 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -46,6 +54,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextView sign_in;
     private ProgressDialog mProgress;
     private DatabaseReference mDatabase;
+    private HashMap<String,String> users=new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,22 +62,10 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         if(!isNetworkAvailable())
-            Toast.makeText(LoginActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
-        mAuth=FirebaseAuth.getInstance();
-        mDatabase= FirebaseDatabase.getInstance().getReference().child("Users");
-        mAuthListener=new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if(firebaseAuth.getCurrentUser() != null)
-                {
-                    Intent intent = new Intent(LoginActivity.this,MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-                }
+            Toast.makeText(LoginActivity.this,"No internet connection",Toast.LENGTH_SHORT).show();
 
-            }
-        };
+
+
         sign_in=(TextView)findViewById(R.id.sign_in);
         sign_in.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,6 +110,24 @@ public class LoginActivity extends AppCompatActivity {
         mProgress=new ProgressDialog(this);
     }
 
+
+    private void collectUsers(HashMap<String, Object> value)
+    {
+        Set mapSet = (Set) value.entrySet();
+        Iterator mapIterator = mapSet.iterator();
+        while (mapIterator.hasNext())
+        {
+            HashMap.Entry mapEntry = (HashMap.Entry) mapIterator.next();
+            HashMap user=(HashMap)mapEntry.getValue();
+            for(Object key:user.keySet())
+            {
+                String k=(String)key;
+                System.out.println(k+"  "+user.get(k));
+                users.put(k,user.get(k).toString());
+            }
+        }
+    }
+
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -138,22 +153,33 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
+                        users.put(mAuth.getCurrentUser().getEmail().replace('.',','),"added");
+                        HashMap<String,String> user=new HashMap<>();
+                        user.put(mAuth.getCurrentUser().getEmail().replace('.',','),"added");
+                        mDatabase.child(mAuth.getCurrentUser().getUid()).setValue(user);
                         mProgress.dismiss();
-                        mAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful())
-                                {
-                                    if(mAuth.getCurrentUser().isEmailVerified())
-                                    {
-                                        mDatabase.child(mAuth.getCurrentUser().getUid()).setValue(mAuth.getCurrentUser().getEmail());
-                                    }
-                                } else {
-                                    if (task.getException() instanceof FirebaseAuthUserCollisionException)
-                                        Toast.makeText(LoginActivity.this, "User with this email already exist.", Toast.LENGTH_SHORT).show();
+                        onStart();
+                    }
+                    else {
+                        mProgress.dismiss();
+                        if (task.getException() instanceof FirebaseAuthUserCollisionException)
+                        {
+                            mDatabase.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                    if(dataSnapshot.child(mAuth.getCurrentUser().getUid()).child(mAuth.getCurrentUser().getEmail().replace('.',',')).getValue().equals("added"))
+                                        Toast.makeText(LoginActivity.this,"User with this credentials already exists",Toast.LENGTH_LONG).show();
+                                    else if(dataSnapshot.child(mAuth.getCurrentUser().getUid()).child(mAuth.getCurrentUser().getEmail().replace('.',',')).getValue().equals("removed"))
+                                        Toast.makeText(LoginActivity.this,"User is removed",Toast.LENGTH_LONG).show();
                                 }
-                            }
-                        });
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
                     }
                 }
             });
@@ -208,6 +234,47 @@ public class LoginActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
+
+        mAuth=FirebaseAuth.getInstance();
+        mDatabase= FirebaseDatabase.getInstance().getReference().child("Users");
+
+        mAuthListener=new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull final FirebaseAuth firebaseAuth) {
+                if(firebaseAuth.getCurrentUser() != null)
+                {
+                    mDatabase.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            collectUsers((HashMap<String,Object>)dataSnapshot.getValue());
+                            System.out.println(users);
+                            System.out.println(firebaseAuth.getCurrentUser());
+                            if(firebaseAuth.getCurrentUser()!=null && users!=null)
+                            {
+                                if(users.get(firebaseAuth.getCurrentUser().getEmail().replace('.',',')).equals("added"))
+                                {
+                                    Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                                else if(users.get(firebaseAuth.getCurrentUser().getEmail().replace('.',',')).equals("removed"))
+                                {
+                                    Toast.makeText(LoginActivity.this,"User is removed",Toast.LENGTH_LONG).show();
+                                    mAuth.signOut();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+                }
+            }
+        };
         mAuth.addAuthStateListener(mAuthListener);
     }
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
@@ -215,38 +282,38 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
-                            mProgress.dismiss();
-                            mAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful())
-                                    {
-                                        if(mAuth.getCurrentUser().isEmailVerified())
-                                        {
-                                            mDatabase.child(mAuth.getCurrentUser().getUid()).setValue(mAuth.getCurrentUser().getEmail());
-                                        }
-                                    }
-                                }
-                            });
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            mProgress.dismiss();
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-
-                        }
-
-                        // ...
+        mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d(TAG, "signInWithCredential:success");
+                    if(!users.isEmpty() && !users.containsKey(mAuth.getCurrentUser().getEmail().replace('.',',')))
+                    {
+                        Log.e("REMOVE",""+users);
+                        users.put(mAuth.getCurrentUser().getEmail().replace('.',','),"added");
+                        HashMap<String,String> user=new HashMap<>();
+                        user.put(mAuth.getCurrentUser().getEmail().replace('.',','),"added");
+                        mDatabase.child(mAuth.getCurrentUser().getUid()).setValue(user);
                     }
-                });
+                    mProgress.dismiss();
+                    onStart();
+                }
+                else if(users.containsKey(mAuth.getCurrentUser().getEmail().replace('.',',')))
+                {
+                    if(users.get(mAuth.getCurrentUser().getEmail().replace('.',',')).equals("removed"))
+                        Toast.makeText(LoginActivity.this, "User is removed", Toast.LENGTH_SHORT).show();
+                    Log.e("REMOVE",""+users);
+                }
+                else {
+                    // If sign in fails, display a message to the user.
+                    mProgress.dismiss();
+                    Log.w(TAG, "signInWithCredential:failure", task.getException());
+                    Toast.makeText(LoginActivity.this, "Authentication failed.",Toast.LENGTH_SHORT).show();
+                }
+                // ...
+            }
+        });
     }
 
     @Override

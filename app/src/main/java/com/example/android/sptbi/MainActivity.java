@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -28,6 +27,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -37,6 +38,11 @@ public class MainActivity extends AppCompatActivity
     private FirebaseUser user;
     private Toolbar toolbar;
     private DatabaseReference mDatabase;
+    private Menu mMenu;
+    private TextView title;
+    private android.support.v4.app.FragmentManager fragmentManager;
+    private DatabaseReference mAdmin;
+    private ArrayList<String> admin=new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +52,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("SP-TBI");
         toolbar.inflateMenu(R.menu.main);
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -81,8 +88,28 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        android.support.v4.app.FragmentManager fragmentManager=getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_main,new IncubatorsFragment()).commit();
+        fragmentManager=getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.app_bar_main,new IncubatorsFragment()).commit();
+
+        mAdmin=FirebaseDatabase.getInstance().getReference().child("Admin");
+        mAdmin.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HashMap<String,String> adminMap=(HashMap<String,String>)dataSnapshot.getValue();
+                ArrayList<String> keyArrayList=new ArrayList<>(adminMap.keySet());
+                System.out.println(keyArrayList);
+                for(String keyAdmin:keyArrayList)
+                {
+                    admin.add(adminMap.get(keyAdmin).replace('.',','));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
     private boolean isNetworkAvailable() {
@@ -113,8 +140,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+
         getMenuInflater().inflate(R.menu.main, menu);
-        if(mAuth.getCurrentUser().getEmail().equals("aashayjain611@gmail.com")) {
+        mMenu=menu;
+        System.out.println(admin);
+        if(admin.contains(mAuth.getCurrentUser().getEmail().replace('.',','))) {
             MenuItem menuItem = menu.findItem(R.id.remove_user);
             menuItem.setVisible(true);
         }
@@ -174,9 +204,67 @@ public class MainActivity extends AppCompatActivity
                 }
             });
         }
-        /*if(id == R.id.remove_user)
+        if(id == R.id.remove_user)
         {
             startActivity(new Intent(MainActivity.this,RemoveUserActivity.class));
+        }
+        /*if(id == R.id.action_search)
+        {
+            toolbar.setBackgroundColor(Color.WHITE);
+            toolbar.setNavigationIcon(null);
+            MenuItem menuItem = mMenu.findItem(R.id.remove_user);
+            menuItem.setVisible(false);
+            menuItem = mMenu.findItem(R.id.action_add);
+            menuItem.setVisible(false);
+            menuItem = mMenu.findItem(R.id.action_delete);
+            menuItem.setVisible(false);
+            menuItem = mMenu.findItem(R.id.edit_profile);
+            menuItem.setVisible(false);
+            menuItem = mMenu.findItem(R.id.my_profile);
+            menuItem.setVisible(false);
+            title.setVisibility(View.GONE);
+            final ImageView upButton=(ImageView)findViewById(R.id.upButton);
+            upButton.setVisibility(View.VISIBLE);
+            final EditText search=(EditText)findViewById(R.id.search);
+            search.setVisibility(View.VISIBLE);
+            final ImageView searchButton=(ImageView)findViewById(R.id.searchButton);
+            searchButton.setVisibility(View.VISIBLE);
+            searchButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String searchIncu=search.getText().toString();
+                    Bundle bundle=new Bundle();
+                    bundle.putString("searchIncu",searchIncu);
+                    Query searchQuery=mDatabase.orderByChild("Name").startAt(searchIncu).endAt(searchIncu + "\uf8ff");
+                    Log.e("query",""+searchQuery);
+                    FragmentManager fragmentManager1=getSupportFragmentManager();
+                    fragmentManager1.beginTransaction().replace(R.id.app_bar_main,new SearchFragment()).commit();
+                    SearchFragment fragment=new SearchFragment();
+                    fragment.setArguments(bundle);
+                }
+            });
+            upButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                    toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
+                    MenuItem menuItem = mMenu.findItem(R.id.remove_user);
+                    menuItem.setVisible(true);
+                    menuItem = mMenu.findItem(R.id.action_add);
+                    menuItem.setVisible(true);
+                    menuItem = mMenu.findItem(R.id.action_delete);
+                    menuItem.setVisible(true);
+                    menuItem = mMenu.findItem(R.id.edit_profile);
+                    menuItem.setVisible(true);
+                    menuItem = mMenu.findItem(R.id.my_profile);
+                    menuItem.setVisible(true);
+                    upButton.setVisibility(View.GONE);
+                    search.setVisibility(View.GONE);
+                    searchButton.setVisibility(View.GONE);
+                    search.setText("");
+                    title.setVisibility(View.VISIBLE);
+                }
+            });
         }*/
         return super.onOptionsItemSelected(item);
     }
@@ -189,25 +277,25 @@ public class MainActivity extends AppCompatActivity
         android.support.v4.app.FragmentManager fragmentManager=getSupportFragmentManager();
         if (id == R.id.nav_incubator)
         {
-            fragmentManager.beginTransaction().replace(R.id.content_main,new IncubatorsFragment()).commit();
-            toolbar.setTitle("Incubations");
+            fragmentManager.beginTransaction().replace(R.id.app_bar_main,new IncubatorsFragment()).commit();
+            getSupportActionBar().setTitle("Incubators");
         }
 
         else if (id == R.id.nav_notification) {
-            toolbar.setTitle("Notifications");
+            getSupportActionBar().setTitle("Notifications");
         }
         else if (id == R.id.nav_chats) {
-            toolbar.setTitle("Chats");
+            getSupportActionBar().setTitle("Chats");
         }
         else if (id == R.id.nav_agreement) {
-            toolbar.setTitle("Agreement");
+            getSupportActionBar().setTitle("Agreements");
         }
         else if(id == R.id.nav_logout){
             mAuth.signOut();
             finish();
         }
         else if (id == R.id.nav_about) {
-            toolbar.setTitle("About");
+            getSupportActionBar().setTitle("About");
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
