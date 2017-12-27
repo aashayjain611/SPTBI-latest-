@@ -83,6 +83,11 @@ public class RemoveUserActivity extends AppCompatActivity {
                             if(!admin.contains(email))
                                 userList.add(new User(key,(String)dataSnapshot.child(key).child("Name").getValue()));
                         }
+                        else
+                        {
+                            if(!admin.contains(email))
+                                userList.add(new User(key,email.replace(',','.')));
+                        }
                     }
                 }
                 UserAdapter userAdapter=new UserAdapter(RemoveUserActivity.this,userList);
