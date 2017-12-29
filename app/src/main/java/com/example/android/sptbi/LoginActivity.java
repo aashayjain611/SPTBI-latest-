@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -37,7 +36,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -64,8 +62,6 @@ public class LoginActivity extends AppCompatActivity {
         if(!isNetworkAvailable())
             Toast.makeText(LoginActivity.this,"No internet connection",Toast.LENGTH_SHORT).show();
 
-
-
         sign_in=(TextView)findViewById(R.id.sign_in);
         sign_in.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,9 +82,11 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 signIn();
+                Log.e("Track","1");
             }
         });
 
+        Log.e("Track","2");
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -195,15 +193,16 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signIn() {
+        Log.e("Track","3");
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
-
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        Log.e("Track","4");
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
@@ -214,6 +213,7 @@ public class LoginActivity extends AppCompatActivity {
                 mProgress.show();
                 mProgress.setCanceledOnTouchOutside(false);
                 // Google Sign In was successful, authenticate with Firebase
+                Log.e("Track","5");
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
             } else {
@@ -251,6 +251,13 @@ public class LoginActivity extends AppCompatActivity {
                             System.out.println(firebaseAuth.getCurrentUser());
                             if(firebaseAuth.getCurrentUser()!=null && users!=null)
                             {
+                                if(!users.containsKey(firebaseAuth.getCurrentUser().getEmail().replace('.',',')))
+                                {
+                                    users.put(firebaseAuth.getCurrentUser().getEmail().replace('.',','),"added");
+                                    HashMap<String,String> user=new HashMap<>();
+                                    user.put(mAuth.getCurrentUser().getEmail().replace('.',','),"added");
+                                    mDatabase.child(mAuth.getCurrentUser().getUid()).setValue(user);
+                                }
                                 if(users.get(firebaseAuth.getCurrentUser().getEmail().replace('.',',')).equals("added"))
                                 {
                                     Intent intent = new Intent(LoginActivity.this,MainActivity.class);
@@ -286,6 +293,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
+
+                    Log.e("Track","6");
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInWithCredential:success");
                     if(!users.isEmpty() && !users.containsKey(mAuth.getCurrentUser().getEmail().replace('.',',')))
