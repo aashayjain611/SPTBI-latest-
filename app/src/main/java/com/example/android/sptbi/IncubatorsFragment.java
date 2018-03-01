@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -88,7 +87,6 @@ public class IncubatorsFragment extends ListFragment {
                     }
                 });
             }
-
         };
         mIncuList.setAdapter(firebaseRecyclerAdapter);
     }

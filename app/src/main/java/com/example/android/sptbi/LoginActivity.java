@@ -108,7 +108,6 @@ public class LoginActivity extends AppCompatActivity {
         mProgress=new ProgressDialog(this);
     }
 
-
     private void collectUsers(HashMap<String, Object> value)
     {
         Set mapSet = (Set) value.entrySet();
